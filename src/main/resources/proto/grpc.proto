@@ -1,0 +1,33 @@
+// 프로토콜 버퍼의 버전을 명시
+syntax = "proto3";
+
+// 빌드시 message정의 들이 주어진 클래스이름으로 각각 static class로 구성된다.
+option java_outer_classname = "GrpcModel";
+
+// 서버와 클라이언트가 같은패키지로 지정되어야 한다
+package com.dealicious.grpc;
+
+// grpc의 통신간의 메시지 모델을 정의한다,
+// 각라인의 마지막 숫자값은 바이너리통신의 마샬링 언마샬링의 순서 필수값
+message Request {
+  string stringValue = 1;         // -> String
+  uint64 longValue = 2;           // -> Long
+  CustomObject customObject = 3;  // 다른 message 객체 포함
+}
+
+message CustomObject {
+  int32 customValue = 1;
+}
+
+message Response {
+  repeated double value = 1; // -> List<Double>
+}
+
+// 서버: 구현할 인터페이스 정의 , 클라이언트: 호출할 인터페이스
+// GRPC는 아래의 네가지의 통신방식을 제공한다,
+service GrpcService {
+  rpc getOne(Request) returns (Response) {}                   // 하나의 요청, 하나의 응답
+  rpc serverStream(Request) returns (stream Response) {}      // 하나의 요청, n개의 스트리밍 응답
+  rpc clientStream(stream Request) returns (Response) {}      // n개의 스트리밍 요청, 하나의 응답
+  rpc biStream(stream Request) returns (stream Response) {}   // 1:n의 스트리밍 형태
+}
